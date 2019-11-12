@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 
 import Context from './Context';
 import Vault from './Vault.json';
+import Staking from './Staking.json';
 
 // This file simulates interaction with a server.
 // The state retrieved from the server is stored in
@@ -155,12 +156,16 @@ export default class Server extends Component {
     });
   }
 
-  onVote = ({ voter, candidate }) => {
-    console.log("ASUUUUUUUUUUUUUUUUUU")
-    const { votes, context } = this.state;
+  onVote = ({ voter, candidate, amount }) => {
+    const { votes, context, addresses } = this.state;
     const temp = votes;
     temp[voter][candidate] = 1;
-    console.log(temp);
+    console.log(voter);
+    console.log(typeof(voter));
+    console.log("amount memeq");
+    console.log(amount);
+    console.log(typeof(amount));
+    this.castVote(candidate, amount, addresses);
     this.setState({
       context: {
         ...context,
@@ -254,8 +259,6 @@ export default class Server extends Component {
   }
 
   async proposeLoan(amount, term) {
-    const accounts = await window.web3.eth.getAccounts();
-
     // Load contract
     const networkId = await window.web3.eth.net.getId();
     const networkData = Vault.networks[networkId];
@@ -263,7 +266,20 @@ export default class Server extends Component {
       const tokenContract = new window.web3.eth.Contract(Vault.abi, networkData.address);
       const loanStatus = await tokenContract.methods.proposeLoan(amount, term).call();
     } else {
-      window.alert('TrstToken contract not deployed to detected network.');
+      window.alert('Vault contract not deployed to detected network.');
+    }
+  }
+
+  async castVote(candidate, amount, addresses) {
+    // Load contract
+    const networkId = await window.web3.eth.net.getId();
+    const networkData = Staking.networks[networkId];
+    if (networkData) {
+      const tokenContract = new window.web3.eth.Contract(Staking.abi, networkData.address);
+      console.log(addresses[candidate]);
+      await tokenContract.methods.setStake(addresses[candidate], amount*1000).call();
+    } else {
+      window.alert('Staking contract not deployed to detected network.');
     }
   }
 

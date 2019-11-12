@@ -71,13 +71,14 @@ class Vote extends Component {
     const { session, service, history } = this.props;
     const voter = session.index;
     const candidate = service.index;
+    const { amount } = service.loan[0];
     return (
       <Context.Consumer>
         {({ onVote, votes }) => (
           <form
             onSubmit={(event) => {
               event.preventDefault();
-              onVote({ voter, candidate });
+              onVote({ candidate, voter, amount });
             }}
           >
             <Box
@@ -92,11 +93,11 @@ class Vote extends Component {
               </Heading>
               <Property
                 name="Amount"
-                value={service.loan[0].amount + " trst"}
+                value={amount + " trst"}
               />
               <Property
                 name="Term"
-                value={service.loan[0].term + " days"}
+                value={amount + " days"}
               />
               <Property
                 name="Rate"
