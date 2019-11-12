@@ -37,23 +37,21 @@ export default class Services extends Component {
   async getBalance() {
     const { tokenContract, account } = this.state;
     const balance = await tokenContract.methods.balance(account).call();
-    console.log(balance);
     this.setState({ balance });
   }
 
   async loadTokenContract() {
-    const { web3 } = window.web3;
-
     // Load account
-    const accounts = await web3.eth.getAccounts();
-    console.log(accounts);
+    const accounts = await window.web3.eth.getAccounts();
+    console.log(accounts)
     this.setState({ account: accounts[0] });
 
     // Load contract
-    const networkId = await web3.eth.net.getId();
+    const networkId = await window.web3.eth.net.getId();
     const networkData = TrstToken.networks[networkId];
     if (networkData) {
-      const tokenContract = new web3.eth.Contract(TrstToken.abi, networkData.address);
+      const tokenContract = new window.web3.eth.Contract(TrstToken.abi, networkData.address);
+      console.log(tokenContract)
       this.setState({ tokenContract });
     } else {
       window.alert('TrstToken contract not deployed to detected network.');
@@ -76,7 +74,6 @@ export default class Services extends Component {
 
   render() {
     const { balance } = this.state;
-    console.log("abc");
     return (
       <Context.Consumer>
         {({ session, services }) => (
@@ -86,7 +83,7 @@ export default class Services extends Component {
                 Me
               </Heading>
               <Heading size="small">
-                {balance ? balance + ' trst' : 'Retrieving...'}
+                {balance ? (balance/1000) + ' trst' : 'Retrieving...'}
               </Heading>
             </Box>
             <Box direction="row" justify="between" align="center">

@@ -7,7 +7,7 @@ import Context from './Context';
 class Content extends Component {
   componentDidMount() {
     const {
-      id, service, onFind, onUnload,
+      id, service, onFind, onUnload, session, onVote, votes,
     } = this.props;
     if (!service || service.id !== id) {
       if (service) {
@@ -18,7 +18,7 @@ class Content extends Component {
   }
 
   render() {
-    const { children, service } = this.props;
+    const { children, service, session, onVote, votes } = this.props;
     if (!service) {
       return (
         <Text>
@@ -26,7 +26,7 @@ class Content extends Component {
         </Text>
       );
     }
-    return children({ service });
+    return children({ service, session, onVote, votes });
   }
 }
 
@@ -44,12 +44,15 @@ Content.defaultProps = {
 
 const Loader = ({ children, id }) => (
   <Context.Consumer>
-    {({ service, onFind, onUnload }) => (
+    {({ service, onFind, onUnload, session, onVote, votes }) => (
       onFind && (
         <Content
           id={id}
           service={service}
+          session={session}
+          votes={votes}
           onFind={onFind}
+          onVote={onVote}
           onUnload={onUnload}
         >
           {children}

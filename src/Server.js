@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 
 import Context from './Context';
+import Vault from './Vault.json';
 
 // This file simulates interaction with a server.
 // The state retrieved from the server is stored in
@@ -8,21 +9,22 @@ import Context from './Context';
 export default class Server extends Component {
   state = { context: { session: { email: 'Me', index: 0 } } }
 
-  componentDidMount() {
+  async componentDidMount() {
     const { context } = this.state;
     // simulate intializing from server
+    const votes = Array(10).fill().map(() => Array(10).fill(0));
     const services = [];
     const addresses = [
-      '35506bd9a1f536553f7b71e57dff00ce0fa104f380897f4666c3ecb665909191',
-      '40dbf1d659611ffb3588d5b2fdd98b465f3be8c3c8e05766046bb0284bb01fdd',
-      'fe0a1016c29b590bb6984ccac01db6ad9918ae085025c29ce198a73465efa619',
-      '7a2962fe049756e0dece49e0dfac91f316858be18fa1d57f510dec4251111fdf',
-      '3ad4fdc80ea35ae865d3c09fbcf45510efaa6eb0e85e1b1d674f2c0c4882a80b',
-      'c95ff01834f03655355f1a107e34e5a38ed5789b6149a24240a02256c112e93b',
-      '4a8c5af80cbbe5a1acdb4e250b9d22c710522445b274c915dbb5966060f2d8d6',
-      '33c3da09ab0e5930fd28bf51df8b9a20d436a189cdb71e745d30c3652a1b0a72',
-      '20f33f809c8a56019e64e1d2743ac2cc914fea2aff50d74fd8c4a3c64288609f',
-      '1717dfa9a5fe38fb24276960f2b910b6b3d7e9367b8e11b879aba34dd86eee1f',
+      '0x7fb6747f0aa76579cc8e0686ff7f5e8324c759c1',
+      '0x819cc2e58ab5cc464ce7fa4539218b9c198291be',
+      '0x3657df40b78259029365fb6224342324f249c1ad',
+      '0x382f07957302852c298f125be10728b5c77929d1',
+      '0x43e270ebcfcc67e142556b9173db8b98cbaf97b3',
+      '0x7cfcb9a4d2f96835197a924a4294f0edbaf1465d',
+      '0x0314e5db07fd9322523622426893899445784503',
+      '0xde17b00ded5906e0ae9a4add5a11b868b0a1366e',
+      '0xf0a5931fab0970654675b68068bbe56242aace37',
+      '0x1d6d51cba34c7dcc36f48d946300bcdadfde8638',
     ];
     const now = (new Date()).toISOString();
 
@@ -31,6 +33,7 @@ export default class Server extends Component {
       created: now,
       status: 'vote',
       id: 'service-0',
+      index: 0,
       name: 'Hafizh Budiman',
       username: 'hafizh',
       address: '35506bd9a1f536553f7b71e57dff00ce0fa104f380897f4666c3ecb665909191',
@@ -48,6 +51,7 @@ export default class Server extends Component {
       created: now,
       status: 'vote',
       id: 'service-1',
+      index: 1,
       name: 'Cornelius Yan Mintareja',
       username: 'onel',
       address: '40dbf1d659611ffb3588d5b2fdd98b465f3be8c3c8e05766046bb0284bb01fdd',
@@ -65,6 +69,7 @@ export default class Server extends Component {
       created: now,
       status: 'ok',
       id: 'service-2',
+      index: 2,
       name: 'Senapati S. Diwangkara',
       username: 'diwang',
       address: 'fe0a1016c29b590bb6984ccac01db6ad9918ae085025c29ce198a73465efa619',
@@ -75,9 +80,11 @@ export default class Server extends Component {
       ...context,
       services,
       addresses,
+      votes,
       onLogin: this.onLogin,
       onLogout: this.onLogout,
       onRegister: this.onRegister,
+      onVote: this.onVote,
       onCreate: this.onCreate,
       onUpdate: this.onUpdate,
       onDelete: this.onDelete,
@@ -86,7 +93,9 @@ export default class Server extends Component {
       onUnload: this.onUnload,
     };
 
-    this.setState({ context: nextContext, services, addresses });
+    this.setState({ context: nextContext, services, addresses, votes });
+
+    await this.loadWeb3();
   }
 
   onLogin = ({ email }) => {
@@ -128,6 +137,7 @@ export default class Server extends Component {
       created: now,
       status: 'ok',
       id: newId,
+      index: idx,
       name: newName,
       username: newUsername,
       address: addresses[idx],
@@ -145,6 +155,21 @@ export default class Server extends Component {
     });
   }
 
+  onVote = ({ voter, candidate }) => {
+    console.log("ASUUUUUUUUUUUUUUUUUU")
+    const { votes, context } = this.state;
+    const temp = votes;
+    temp[voter][candidate] = 1;
+    console.log(temp);
+    this.setState({
+      context: {
+        ...context,
+        votes: temp,
+      },
+      votes: temp,
+    });
+  }
+
   onCreate = ({ loanAmount, loanTerm }) => {
     const { context, services } = this.state;
     const newLoan = {
@@ -155,6 +180,7 @@ export default class Server extends Component {
     const temp = services;
     temp[context.session.index].loan = services[context.session.index].loan.concat(newLoan);
     temp[context.session.index].status = 'vote';
+    this.proposeLoan(loanAmount, loanTerm);
     this.setState({
       context: {
         ...context,
@@ -225,6 +251,34 @@ export default class Server extends Component {
         services: nextServices,
       },
     });
+  }
+
+  async proposeLoan(amount, term) {
+    const accounts = await window.web3.eth.getAccounts();
+
+    // Load contract
+    const networkId = await window.web3.eth.net.getId();
+    const networkData = Vault.networks[networkId];
+    if (networkData) {
+      const tokenContract = new window.web3.eth.Contract(Vault.abi, networkData.address);
+      const loanStatus = await tokenContract.methods.proposeLoan(amount, term).call();
+    } else {
+      window.alert('TrstToken contract not deployed to detected network.');
+    }
+  }
+
+  // Connect with MetaMask
+  async loadWeb3() {
+    if (window.ethereum) {
+      window.web3 = new Web3(window.ethereum);
+      await window.ethereum.enable();
+    }
+    else if (window.web3) {
+      window.web3 = new Web3(window.web3.currentProvider);
+    }
+    else {
+      window.alert('Non-Ethereum browser detected. You should consider trying MetaMask!');
+    }
   }
 
   render() {

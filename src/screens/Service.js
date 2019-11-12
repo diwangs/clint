@@ -1,10 +1,11 @@
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import {
-  Box, Heading, Markdown, RoutedButton, Text, RangeInput,
+  Box, Heading, Markdown, RoutedButton, Button, Text, RangeInput,
 } from 'grommet';
 import { Location } from 'grommet-icons';
 
+import Context from '../Context';
 import Loader from '../Loader';
 
 const Property = ({ name, value }) => (
@@ -56,40 +57,80 @@ class Slider extends Component {
   }
 }
 
+class Vote extends Component {
+  static propTypes = {
+    history: PropTypes.shape({}).isRequired,
+  }
+
+  componentDidMount() {
+    console.log(this.props.session.index);
+    console.log(this.props.service.index);
+  }
+
+  render() {
+    const { session, service, history } = this.props;
+    const voter = session.index;
+    const candidate = service.index;
+    return (
+      <Context.Consumer>
+        {({ onVote, votes }) => (
+          <form
+            onSubmit={(event) => {
+              event.preventDefault();
+              onVote({ voter, candidate });
+            }}
+          >
+            <Box
+              margin={{ top: 'medium' }}
+              pad="large"
+              round="medium"
+              gap="small"
+              border={{ size: 'small' }}
+            >
+              <Heading level="2" alignSelf="center">
+                Vote
+              </Heading>
+              <Property
+                name="Amount"
+                value={service.loan[0].amount + " trst"}
+              />
+              <Property
+                name="Term"
+                value={service.loan[0].term + " days"}
+              />
+              <Property
+                name="Rate"
+                value="10%"
+              />
+              <Slider />
+              {votes[voter][candidate] === 0 && (
+                <Button
+                  type="submit"
+                  label="Vote"
+                  primary
+                  alignSelf="center"
+                  onClick={() => {}}
+                />
+              )}
+            </Box>
+          </form>
+        )}
+      </Context.Consumer>
+    );
+  }
+}
+
 const Service = ({ match: { params: { id } } }) => (
   <Loader id={id}>
-    {({ service }) => (
+    {({ service, session, onVote, votes }) => (
       <Box>
         {service.status === 'vote' && (
-          <Box
-            margin={{ top: 'medium' }}
-            pad="large"
-            round="medium"
-            gap="small"
-            border={{ size: 'small' }}
-          >
-            <Heading level="2" alignSelf="center">
-              Vote
-            </Heading>
-            <Property
-              name="Amount"
-              value="IDR 250.000"
-            />
-            <Property
-              name="Term"
-              value="2 months"
-            />
-            <Property
-              name="Rate"
-              value="10%"
-            />
-            <Slider />
-            <RoutedButton
-              label="Vote"
-              path={`/service/${id}`}
-              alignSelf="center"
-            />
-          </Box>
+          <Vote
+            service={service}
+            session={session}
+            onVote={onVote}
+            votes={votes}
+          />
         )}
         <Box
           direction="row"
