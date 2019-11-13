@@ -125,7 +125,30 @@ class Vote extends Component {
 
 const Service = ({ match: { params: { id } } }) => (
   <Loader id={id}>
-    {({ service, session, onVote, votes }) => (
+    {({
+      service,
+      session,
+      onVote,
+      votes,
+      name,
+      gender,
+      birthDate,
+      birthPlace,
+      idCard,
+      momMaidenName,
+      hasDivorced,
+      isSingle,
+      lastEducation,
+      address,
+      houseStatus,
+      kelurahan,
+      kecamatan,
+      city,
+      zipCode,
+      phone,
+      email,
+      npwp,
+    }) => (
       <Box>
         {service.status === 'vote' && (
           <Vote
@@ -140,36 +163,76 @@ const Service = ({ match: { params: { id } } }) => (
           justify="between"
           align="center"
           gap="small"
+          margin={{ top: 'large', bottom: 'large' }}
         >
           <Heading size="small" color="brand">
-            {service.name}
+            {name}
           </Heading>
         </Box>
-        {service.notes && (
-          <Box margin={{ bottom: 'large' }}>
-            <Markdown>
-              {service.notes}
-            </Markdown>
-          </Box>
-        )}
         <Box
-          gap="medium"
+          gap="large"
           margin={{ bottom: 'large' }}
         >
           <Property
-            name="Status"
-            value={service.status}
+            name="Gender"
+            value={gender}
           />
           <Property
-            name="Created"
-            value={(new Date(service.created)).toLocaleDateString()}
+            name="Birth Date"
+            value={birthDate}
           />
-          {service.updated && (
-            <Property
-              name="Updated"
-              value={(new Date(service.updated)).toLocaleDateString()}
-            />
-          )}
+          <Property
+            name="Birth Place"
+            value={birthPlace}
+          />
+          <Property
+            name="Phone Number"
+            value={phone}
+          />
+          <Property
+            name="Email"
+            value={email}
+          />
+          <Property
+            name="Citizenship ID"
+            value={idCard}
+          />
+          <Property
+            name="Marital Status"
+            value={isSingle}
+          />
+          <Property
+            name="Last Education"
+            value={lastEducation}
+          />
+          <Property
+            name="Address"
+            value={address}
+          />
+          <Property
+            name="City"
+            value={city}
+          />
+          <Property
+            name="District"
+            value={kecamatan}
+          />
+          <Property
+            name="Subdistrict"
+            value={kelurahan}
+          />
+          <Property
+            name="Zip Code"
+            value={zipCode}
+          />
+          <Property
+            name="House Status"
+            value={houseStatus}
+          />
+          <Property
+            name="NPWP"
+            value={npwp}
+          />
         </Box>
       </Box>
     )}
