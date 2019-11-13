@@ -40,7 +40,7 @@ export default class Server extends Component {
       address: '35506bd9a1f536553f7b71e57dff00ce0fa104f380897f4666c3ecb665909191',
       loan: [
         {
-          amount: 10,
+          amount: 10000000,
           term: 60,
           status: 'In Approval',
         },
@@ -58,7 +58,7 @@ export default class Server extends Component {
       address: '40dbf1d659611ffb3588d5b2fdd98b465f3be8c3c8e05766046bb0284bb01fdd',
       loan: [
         {
-          amount: 5,
+          amount: 5000000,
           term: 30,
           status: 'In Approval',
         },

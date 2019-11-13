@@ -45,11 +45,11 @@ export default class Add extends Component {
                 <TextInput />
               </FormField>
               <FormField label="Amount">
-                <Text alignSelf="end" size="large">{loanAmount + ' trst'}</Text>
+                <Text alignSelf="end" size="large">{loanAmount/1000000 + ' million Rupiah'}</Text>
                 <RangeInput
                   min={0}
-                  max={20}
-                  step={1}
+                  max={500000000}
+                  step={100000}
                   value={loanAmount}
                   onChange={event => this.setState({ loanAmount: parseInt(event.target.value, 10) })}
                 />

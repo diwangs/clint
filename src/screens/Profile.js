@@ -141,7 +141,7 @@ export default class Services extends Component {
                         >
                           <Property
                             name="Amount"
-                            value={loan.amount + ' trst'}
+                            value={'Rp ' + loan.amount/1000000 + ' million'}
                           />
                           <Property
                             name="Term"

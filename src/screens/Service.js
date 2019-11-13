@@ -93,7 +93,7 @@ class Vote extends Component {
               </Text>
               <Property
                 name="Amount"
-                value={amount + " trst"}
+                value={amount/1000000 + " million Rupiah"}
               />
               <Property
                 name="Term"
