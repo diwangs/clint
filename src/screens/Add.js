@@ -44,6 +44,9 @@ export default class Add extends Component {
               <FormField label="Bank Account Number">
                 <TextInput />
               </FormField>
+              <FormField label="Bank Name">
+                <TextInput />
+              </FormField>
               <FormField label="Amount">
                 <Text alignSelf="end" size="large">{loanAmount/1000000 + ' million Rupiah'}</Text>
                 <RangeInput
