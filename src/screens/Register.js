@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import {
-  Box, Button, FormField, Heading, TextInput, RangeInput, Text,
+  Box, Button, FormField, Heading, TextInput, 
 } from 'grommet';
 
 import Context from '../Context';

@@ -12,7 +12,7 @@ export default class Services extends Component {
     const { search } = this.state;
     return (
       <Context.Consumer>
-        {({ session, services, onSearch }) => (
+        {({ session, services }) => (
           <Box>
             <Box direction="row" justify="between" align="center">
               <Heading size="small" color="brand">
@@ -22,14 +22,10 @@ export default class Services extends Component {
             <TextInput
               placeholder="search"
               value={search}
-              onChange={(event) => {
-                const nextSearch = event.target.value;
-                onSearch(nextSearch);
-                this.setState({ search: nextSearch });
-              }}
+              onChange={event => this.setState({ search: event.target.value })}
             />
             <Box margin={{ vertical: 'medium' }}>
-              <Grid columns="small" gap="small">
+              <Grid columns="medium" gap="small">
                 {services ? (
                   <InfiniteScroll items={services}>
                     {service => (

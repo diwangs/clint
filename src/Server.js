@@ -204,6 +204,7 @@ export default class Server extends Component {
         ...context,
         services: nextServices,
       },
+      services: nextServices,
     });
   }
 

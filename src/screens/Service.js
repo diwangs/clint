@@ -71,7 +71,7 @@ class Vote extends Component {
     const { session, service, history } = this.props;
     const voter = session.index;
     const candidate = service.index;
-    const { amount } = service.loan[0];
+    const { amount, term } = service.loan[0];
     return (
       <Context.Consumer>
         {({ onVote, votes }) => (
@@ -97,7 +97,7 @@ class Vote extends Component {
               />
               <Property
                 name="Term"
-                value={amount + " days"}
+                value={term + " days"}
               />
               <Property
                 name="Rate"
