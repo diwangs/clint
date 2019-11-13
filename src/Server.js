@@ -17,7 +17,7 @@ export default class Server extends Component {
     const services = [];
     const addresses = [
       '0x7fb6747f0aa76579cc8e0686ff7f5e8324c759c1',
-      '0x819cc2e58ab5cc464ce7fa4539218b9c198291be',
+      '0x87139bb2e0da7e86E96a876C5A2fE1c8a31200d3',
       '0x3657df40b78259029365fb6224342324f249c1ad',
       '0x382f07957302852c298f125be10728b5c77929d1',
       '0x43e270ebcfcc67e142556b9173db8b98cbaf97b3',
@@ -55,7 +55,7 @@ export default class Server extends Component {
       index: 1,
       name: 'Cornelius Yan Mintareja',
       username: 'onel',
-      address: '40dbf1d659611ffb3588d5b2fdd98b465f3be8c3c8e05766046bb0284bb01fdd',
+      address: '53e9fb16787da45443420a8ce22c44f3e45c5efde8bc6f5e40d3b9bf23f7674a',
       loan: [
         {
           amount: 5000000,
@@ -185,6 +185,7 @@ export default class Server extends Component {
     const temp = services;
     temp[context.session.index].loan = services[context.session.index].loan.concat(newLoan);
     temp[context.session.index].status = 'vote';
+    console.log("onCreate")
     this.proposeLoan(loanAmount, loanTerm);
     this.setState({
       context: {
@@ -265,7 +266,9 @@ export default class Server extends Component {
     const networkData = Vault.networks[networkId];
     if (networkData) {
       const tokenContract = new window.web3.eth.Contract(Vault.abi, networkData.address);
-      const loanStatus = await tokenContract.methods.proposeLoan(amount, term).call();
+      const yeetfrom = (await web3.eth.getAccounts())[0]
+      const loanStatus = await tokenContract.methods.proposeLoan(amount, term).send({from : yeetfrom});
+      console.log("loanStatus")
     } else {
       window.alert('Vault contract not deployed to detected network.');
     }
