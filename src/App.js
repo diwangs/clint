@@ -15,6 +15,24 @@ import Service from './screens/Service';
 import Profile from './screens/Profile';
 import Circle from './screens/Circle';
 
+const clint = {
+  global: {
+    colors: {
+      brand: '#4662ea',
+      accent: '#f9cb47',
+      focus: '#f9cb47',
+    },
+    font: {
+      family: 'Rubik',
+    },
+  },
+  rangeInput: {
+    thumb: {
+      color: '#f9cb47',
+    },
+  },
+};
+
 const Content = () => (
   <ResponsiveContext.Consumer>
     {responsive => (
@@ -47,8 +65,8 @@ const Content = () => (
 );
 
 export default () => (
-  <Router basename="/clint">
-    <Grommet theme={grommet}>
+  <Router basename="/">
+    <Grommet theme={clint} full>
       <Server>
         <Content />
       </Server>

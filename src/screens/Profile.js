@@ -1,8 +1,10 @@
 import React, { Component } from 'react';
 import Web3 from 'web3';
 import {
-  Box, Grid, Heading, InfiniteScroll, RoutedButton, Text,
+  Box, Grid, Heading, InfiniteScroll, RoutedButton, Text, Image,
 } from 'grommet';
+
+import card from '../../public/img/card.png'
 
 import Context from '../Context';
 import TrstToken from '../TrstToken.json';
@@ -78,13 +80,42 @@ export default class Services extends Component {
       <Context.Consumer>
         {({ session, services }) => (
           <Box>
-            <Box direction="row" justify="between" align="center">
-              <Heading>
-                Me
-              </Heading>
-              <Heading size="small">
-                {balance ? (balance/1000) + ' trst' : 'Retrieving...'}
-              </Heading>
+            <Box
+              direction="row"
+              justify="between"
+              align="center"
+              background="brand"
+              height="xsmall"
+              pad="large"
+              round="medium"
+              margin={{ top: "medium" }}
+            >
+              <Box height="xsmall" width="xxsmall">
+                <Image
+                  src={card}
+                  fit="contain"
+                />
+              </Box>
+              <Box direction="column">
+                <Text size="xxlarge">
+                  <strong>
+                    {balance ? (balance/1000) + ' trst' : 'Retrieving...'}
+                  </strong>
+                </Text>
+                <Text size="small">
+                  current balance
+                </Text>
+              </Box>
+              <Box direction="column">
+                <Text size="xxlarge">
+                  <strong>
+                    13/11
+                  </strong>
+                </Text>
+                <Text size="small">
+                  last voted
+                </Text>
+              </Box>
             </Box>
             <Box direction="row" justify="between" align="center">
               <Heading size="small">
@@ -92,7 +123,7 @@ export default class Services extends Component {
               </Heading>
               <RoutedButton label="Apply" path="/add" />
             </Box>
-            <Box margin={{ vertical: 'medium' }}>
+            <Box margin={{ vertical: 'medium', top: 'medium' }}>
               <Grid columns="small" gap="small">
                 {(services[session.index].loan && services[session.index].loan.length > 0) && (
                   <InfiniteScroll items={services[session.index].loan}>

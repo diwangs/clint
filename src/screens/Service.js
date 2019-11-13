@@ -82,15 +82,15 @@ class Vote extends Component {
             }}
           >
             <Box
-              margin={{ top: 'medium' }}
+              margin="small"
               pad="large"
               round="medium"
               gap="small"
-              border={{ size: 'small' }}
+              background="brand"
             >
-              <Heading level="2" alignSelf="center">
-                Vote
-              </Heading>
+              <Text size="xxlarge" alignSelf="center">
+                <strong>Vote</strong>
+              </Text>
               <Property
                 name="Amount"
                 value={amount + " trst"}
@@ -110,6 +110,8 @@ class Vote extends Component {
                   label="Vote"
                   primary
                   alignSelf="center"
+                  color="accent"
+                  margin={{ top: "medium" }}
                   onClick={() => {}}
                 />
               )}
@@ -139,13 +141,9 @@ const Service = ({ match: { params: { id } } }) => (
           align="center"
           gap="small"
         >
-          <Heading>
+          <Heading size="small" color="brand">
             {service.name}
           </Heading>
-          <RoutedButton
-            label="Edit"
-            path={`/service/edit/${id}`}
-          />
         </Box>
         {service.notes && (
           <Box margin={{ bottom: 'large' }}>
@@ -172,13 +170,6 @@ const Service = ({ match: { params: { id } } }) => (
               value={(new Date(service.updated)).toLocaleDateString()}
             />
           )}
-        </Box>
-        <Box alignSelf="start">
-          <RoutedButton
-            icon={<Location />}
-            path={`/service/location/${id}`}
-            hoverIndicator
-          />
         </Box>
       </Box>
     )}

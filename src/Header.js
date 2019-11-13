@@ -1,16 +1,17 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import {
-  Box, RoutedButton, Menu, Text,
+  Box, RoutedButton, Menu, Text, Image,
 } from 'grommet';
 import { Checkmark } from 'grommet-icons';
 
 import Context from './Context';
+import logo from '../public/img/logo.png';
 
 const Header = ({ history }) => (
   <Context.Consumer>
     {({ session, onLogout }) => (
-      <Box direction="row" justify="center" align="center">
+      <Box direction="row" justify="between" align="center">
         <RoutedButton path={session ? '/' : '/login'} hoverIndicator>
           <Box
             pad="small"
@@ -18,15 +19,17 @@ const Header = ({ history }) => (
             align="center"
             gap="small"
           >
-            <Text size="large">
-              Clint
-            </Text>
-            <Checkmark />
+            <Box height="xxsmall" width="xsmall">
+              <Image
+                src={logo}
+                fit="contain"
+              />
+            </Box>
           </Box>
         </RoutedButton>
         {session && (
           <Menu
-            label={session.email}
+            label={'Welcome, ' + session.email}
             items={[
               {
                 label: 'Circle',

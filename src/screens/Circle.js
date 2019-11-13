@@ -15,10 +15,9 @@ export default class Services extends Component {
         {({ session, services, onSearch }) => (
           <Box>
             <Box direction="row" justify="between" align="center">
-              <Heading size="small">
+              <Heading size="small" color="brand">
                 Your Circle
               </Heading>
-              <RoutedButton label="Apply" path="/add" />
             </Box>
             <TextInput
               placeholder="search"
@@ -58,7 +57,7 @@ export default class Services extends Component {
                                   {service.name}
                                 </Text>
                                 {service.status !== 'ok' && (
-                                  <Box pad="xsmall" round="xsmall" background="status-critical" />
+                                  <Box pad="xsmall" round="xsmall" background="brand" />
                                 )}
                               </Box>
                             </RoutedButton>
