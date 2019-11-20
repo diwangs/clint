@@ -1,8 +1,10 @@
 import React, { Component } from 'react';
+import Web3 from 'web3';
 
 import Context from './Context';
-import Vault from './Vault.json';
-import Staking from './Staking.json';
+import TrstToken from './contracts/TrstToken.json';
+import Vault from './contracts/Vault.json';
+import Staking from './contracts/Staking.json';
 
 // This file simulates interaction with a server.
 // The state retrieved from the server is stored in
@@ -16,7 +18,7 @@ export default class Server extends Component {
     const votes = Array(10).fill().map(() => Array(10).fill(0));
     const services = [];
     const addresses = [
-      '0x7fb6747f0aa76579cc8e0686ff7f5e8324c759c1',
+      '0xceBc86eC5c9ee28702a0518EAC98c7E4d2569648',
       '0x87139bb2e0da7e86E96a876C5A2fE1c8a31200d3',
       '0x3657df40b78259029365fb6224342324f249c1ad',
       '0x382f07957302852c298f125be10728b5c77929d1',
@@ -97,6 +99,46 @@ export default class Server extends Component {
     this.setState({ context: nextContext, services, addresses, votes });
 
     await this.loadWeb3();
+    await Promise.all([
+      this.loadContract(TrstToken),
+      this.loadContract(Vault),
+      this.loadContract(Staking)
+    ])
+  }
+
+  // Connect with MetaMask
+  async loadWeb3() {
+    if (window.ethereum) {
+      window.web3 = new Web3(window.ethereum)
+      await window.ethereum.enable()
+    } else if (window.web3) {
+      window.web3 = new Web3(window.web3.currentProvider)
+    } else {
+      window.alert('Non-Ethereum browser detected. You should consider trying MetaMask!')
+    }
+
+    // Load account
+    if (window.web3) {
+      const accounts = await window.web3.eth.getAccounts()
+      // window.web3.eth.defaultAccount = accounts[0] is defaultAccount deprecated?
+      // https://ethereum.stackexchange.com/questions/38365/web3-eth-defaultaccount-not-working
+      this.setState({ account: accounts[0] })
+    }
+  }
+
+  async loadContract(contractDefinition) {
+    const web3 = window.web3
+    const networkId = await web3.eth.net.getId()
+    const networkData = contractDefinition.networks[networkId]
+    if (networkData) {
+      const contractHandle = new web3.eth.Contract(contractDefinition.abi, networkData.address)
+      var newState = {}
+      newState[contractDefinition.contractName] = contractHandle
+      this.setState(newState)
+      return contractHandle
+    } else {
+      window.alert("loadContract: " + contractDefinition.contractName + ' contract not deployed to detected network.')
+    }
   }
 
   onLogin = ({ email }) => {
@@ -160,11 +202,6 @@ export default class Server extends Component {
     const { votes, context, addresses } = this.state;
     const temp = votes;
     temp[voter][candidate] = 1;
-    console.log(voter);
-    console.log(typeof(voter));
-    console.log("amount memeq");
-    console.log(amount);
-    console.log(typeof(amount));
     this.castVote(candidate, amount, addresses);
     this.setState({
       context: {
@@ -185,7 +222,6 @@ export default class Server extends Component {
     const temp = services;
     temp[context.session.index].loan = services[context.session.index].loan.concat(newLoan);
     temp[context.session.index].status = 'vote';
-    console.log("onCreate")
     this.proposeLoan(loanAmount, loanTerm);
     this.setState({
       context: {
@@ -261,43 +297,18 @@ export default class Server extends Component {
   }
 
   async proposeLoan(amount, term) {
-    // Load contract
-    const networkId = await window.web3.eth.net.getId();
-    const networkData = Vault.networks[networkId];
-    if (networkData) {
-      const tokenContract = new window.web3.eth.Contract(Vault.abi, networkData.address);
-      const yeetfrom = (await web3.eth.getAccounts())[0]
-      const loanStatus = await tokenContract.methods.proposeLoan(amount, term).send({from : yeetfrom});
-      console.log("loanStatus")
+    if (this.state.Vault) {
+      await this.state.Vault.methods.proposeLoan(amount, term).send({from : this.state.account});
     } else {
       window.alert('Vault contract not deployed to detected network.');
     }
   }
 
-  async castVote(candidate, amount, addresses) {
-    // Load contract
-    const networkId = await window.web3.eth.net.getId();
-    const networkData = Staking.networks[networkId];
-    if (networkData) {
-      const tokenContract = new window.web3.eth.Contract(Staking.abi, networkData.address);
-      console.log(addresses[candidate]);
-      await tokenContract.methods.setStake(addresses[candidate], amount*1000).call();
+  async castVote(candidate, amount) {
+    if (this.state.Staking) {
+      await this.state.Staking.methods.setStake(candidate, amount*1000).send({from : this.state.account});
     } else {
       window.alert('Staking contract not deployed to detected network.');
-    }
-  }
-
-  // Connect with MetaMask
-  async loadWeb3() {
-    if (window.ethereum) {
-      window.web3 = new Web3(window.ethereum);
-      await window.ethereum.enable();
-    }
-    else if (window.web3) {
-      window.web3 = new Web3(window.web3.currentProvider);
-    }
-    else {
-      window.alert('Non-Ethereum browser detected. You should consider trying MetaMask!');
     }
   }
 

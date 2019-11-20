@@ -7,7 +7,7 @@ import {
 import card from '../../public/img/card.png'
 
 import Context from '../Context';
-import TrstToken from '../TrstToken.json';
+import TrstToken from '../contracts/TrstToken.json';
 
 const Property = ({ name, value }) => (
   <Box direction="row-responsive" gap="small">
@@ -45,7 +45,7 @@ export default class Services extends Component {
   async loadTokenContract() {
     // Load account
     const accounts = await window.web3.eth.getAccounts();
-    console.log(accounts)
+    // console.log(accounts)
     this.setState({ account: accounts[0] });
 
     // Load contract
@@ -53,7 +53,7 @@ export default class Services extends Component {
     const networkData = TrstToken.networks[networkId];
     if (networkData) {
       const tokenContract = new window.web3.eth.Contract(TrstToken.abi, networkData.address);
-      console.log(tokenContract)
+      // console.log(tokenContract)
       this.setState({ tokenContract });
     } else {
       window.alert('TrstToken contract not deployed to detected network.');
@@ -65,6 +65,8 @@ export default class Services extends Component {
     if (window.ethereum) {
       window.web3 = new Web3(window.ethereum);
       await window.ethereum.enable();
+      console.log("in Profile")
+      console.log(window.web3)
     }
     else if (window.web3) {
       window.web3 = new Web3(window.web3.currentProvider);
