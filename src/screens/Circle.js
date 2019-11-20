@@ -25,7 +25,7 @@ export default class Services extends Component {
               onChange={event => this.setState({ search: event.target.value })}
             />
             <Box margin={{ vertical: 'medium' }}>
-              <Grid columns="medium" gap="small">
+              <Grid columns="small" gap="small">
                 {services ? (
                   <InfiniteScroll items={services}>
                     {service => (

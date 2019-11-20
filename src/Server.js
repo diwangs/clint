@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import Web3 from 'web3';
 
+import axios from 'axios';
+
 import Context from './Context';
 import TrstToken from './contracts/TrstToken.json';
 import Vault from './contracts/Vault.json';
@@ -170,7 +172,27 @@ export default class Server extends Component {
     });
   }
 
-  onRegister = ({ newUsername, newName }) => {
+  onRegister = ({
+    newUsername,
+    newName,
+    newAddress,
+    newBirthDate,
+    newBirthPlace,
+    newCity,
+    newEmail,
+    newGender,
+    newHasDivorced,
+    newHouseStatus,
+    newIdCard,
+    newIsSingle,
+    newKecamatan,
+    newKelurahan,
+    newLastEducation,
+    newMomMaidenName,
+    newNpwp,
+    newPhone,
+    newZipCode,
+  }) => {
     const { context, services, addresses } = this.state;
 
     const now = (new Date()).toISOString();
@@ -188,7 +210,7 @@ export default class Server extends Component {
     };
     const temp = services;
     temp.push(newUser);
-    
+
     this.setState({
       context: {
         ...context,
@@ -196,6 +218,39 @@ export default class Server extends Component {
       },
       services: temp,
     });
+
+    const payLoad = {
+      "key": String(newUsername),
+      "name": String(newName),
+      "gender": String(newGender),
+      "birthDate": String(newBirthDate),
+      "birthPlace": String(newBirthPlace),
+      "idCard": String(newIdCard),
+      "momMaidenName": String(newMomMaidenName),
+      "hasDivorced": String(newHasDivorced),
+      "isSingle": String(newIsSingle),
+      "lastEducation": String(newLastEducation),
+      "address": String(newAddress),
+      "houseStatus": String(newHouseStatus),
+      "kelurahan": String(newKelurahan),
+      "kecamatan": String(newKecamatan),
+      "city": String(newCity),
+      "zipCode": String(newZipCode),
+      "phone": String(newPhone),
+      "email": String(newEmail),
+      "npwp": String(newNpwp),
+    };
+
+    console.log(payLoad);
+
+    axios.post('http://3.91.229.34:3000/user', payLoad)
+    .then(function (response) {
+      console.log(response);
+    })
+    .catch(function (error) {
+      // handle error
+      console.log(error);
+    })
   }
 
   onVote = ({ voter, candidate, amount }) => {
