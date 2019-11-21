@@ -16,6 +16,26 @@ export default class Server extends Component {
 
   async componentDidMount() {
     const { context } = this.state;
+
+    let account;
+
+    if (window.ethereum) {
+      window.web3 = new Web3(window.ethereum)
+      await window.ethereum.enable()
+    } else if (window.web3) {
+      window.web3 = new Web3(window.web3.currentProvider)
+    } else {
+      window.alert('Non-Ethereum browser detected. You should consider trying MetaMask!')
+    }
+
+    // Load account
+    if (window.web3) {
+      const accounts = await window.web3.eth.getAccounts();
+      // window.web3.eth.defaultAccount = accounts[0] is defaultAccount deprecated?
+      // https://ethereum.stackexchange.com/questions/38365/web3-eth-defaultaccount-not-working
+      account = accounts[0];
+    }
+
     // simulate intializing from server
     const votes = Array(10).fill().map(() => Array(10).fill(0));
     const services = [];
@@ -86,6 +106,7 @@ export default class Server extends Component {
       services,
       addresses,
       votes,
+      account,
       onLogin: this.onLogin,
       onLogout: this.onLogout,
       onRegister: this.onRegister,
@@ -98,7 +119,7 @@ export default class Server extends Component {
       onUnload: this.onUnload,
     };
 
-    this.setState({ context: nextContext, services, addresses, votes });
+    this.setState({ context: nextContext, services, addresses, votes, account });
 
     await this.loadWeb3();
     await Promise.all([
@@ -107,26 +128,6 @@ export default class Server extends Component {
       this.loadContract(Staking)
     ])
     console.log(await this.stakable())
-  }
-
-  // Connect with MetaMask
-  async loadWeb3() {
-    if (window.ethereum) {
-      window.web3 = new Web3(window.ethereum)
-      await window.ethereum.enable()
-    } else if (window.web3) {
-      window.web3 = new Web3(window.web3.currentProvider)
-    } else {
-      window.alert('Non-Ethereum browser detected. You should consider trying MetaMask!')
-    }
-
-    // Load account
-    if (window.web3) {
-      const accounts = await window.web3.eth.getAccounts()
-      // window.web3.eth.defaultAccount = accounts[0] is defaultAccount deprecated?
-      // https://ethereum.stackexchange.com/questions/38365/web3-eth-defaultaccount-not-working
-      this.setState({ account: accounts[0] })
-    }
   }
 
   async loadContract(contractDefinition) {

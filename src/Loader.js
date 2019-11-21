@@ -6,14 +6,9 @@ import axios from 'axios';
 import Context from './Context';
 
 class Content extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {};
-  }
-
   componentDidMount() {
     const {
-      id, service, onFind, onUnload, session, onVote, votes,
+      id, session, service, onFind, onUnload, onVote, votes, account,
     } = this.props;
     if (!service || service.id !== id) {
       if (service) {
@@ -23,58 +18,8 @@ class Content extends Component {
     }
   }
 
-  async getData(key) {
-    try {
-      const { username } = key
-      const response = await axios.get('http://3.91.229.34:3000/user/' + username);
-      const { data } = response;
-      this.setState({
-        name: data.name,
-        gender: data.gender,
-        birthDate: data.birthDate,
-        birthPlace: data.birthPlace,
-        idCard: data.idCard,
-        momMaidenName: data.momMaidenName,
-        hasDivorced: data.hasDivorced,
-        isSingle: data.isSingle,
-        lastEducation: data.lastEducation,
-        address: data.address,
-        houseStatus: data.houseStatus,
-        kelurahan: data.kelurahan,
-        kecamatan: data.kecamatan,
-        city: data.city,
-        zipCode: data.zipCode,
-        phone: data.phone,
-        email: data.email,
-        npwp: data.npwp,
-      });
-    } catch (error) {
-      console.error(error);
-    }
-  }
-
   render() {
-    const { children, service, session, onVote, votes } = this.props;
-    const {
-      name,
-      gender,
-      birthDate,
-      birthPlace,
-      idCard,
-      momMaidenName,
-      hasDivorced,
-      isSingle,
-      lastEducation,
-      address,
-      houseStatus,
-      kelurahan,
-      kecamatan,
-      city,
-      zipCode,
-      phone,
-      email,
-      npwp,
-    } = this.state;
+    const { children, service, onVote, votes, session, account } = this.props;
     if (!service) {
       return (
         <Text>
@@ -82,47 +27,14 @@ class Content extends Component {
         </Text>
       );
     }
-    console.log("MEMEEEEKK " + service.username);
-
-    this.getData(service);
-
-    if (!name) {
-      return (
-        <Text>
-          Loading ...
-        </Text>
-      );
-    }
-    return children({
-      service,
-      session,
-      onVote,
-      votes,
-      name,
-      gender,
-      birthDate,
-      birthPlace,
-      idCard,
-      momMaidenName,
-      hasDivorced,
-      isSingle,
-      lastEducation,
-      address,
-      houseStatus,
-      kelurahan,
-      kecamatan,
-      city,
-      zipCode,
-      phone,
-      email,
-      npwp,
-    });
+    return children({ service, session, onVote, votes, account });
   }
 }
 
 Content.propTypes = {
   children: PropTypes.func.isRequired,
   id: PropTypes.string.isRequired,
+  account: PropTypes.string.isRequired,
   service: PropTypes.shape({}),
   onFind: PropTypes.func.isRequired,
   onUnload: PropTypes.func.isRequired,
@@ -134,11 +46,12 @@ Content.defaultProps = {
 
 const Loader = ({ children, id }) => (
   <Context.Consumer>
-    {({ service, onFind, onUnload, session, onVote, votes }) => (
+    {({ service, onFind, onUnload, session, onVote, votes, account }) => (
       onFind && (
         <Content
           id={id}
           service={service}
+          account={account}
           session={session}
           votes={votes}
           onFind={onFind}

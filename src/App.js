@@ -65,7 +65,7 @@ const Content = () => (
 );
 
 export default () => (
-  <Router basename="/">
+  <Router>
     <Grommet theme={clint} full>
       <Server>
         <Content />

@@ -1,9 +1,8 @@
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import {
-  Box, Heading, Markdown, RoutedButton, Button, Text, RangeInput,
+  Box, Heading, Button, Text, RangeInput,
 } from 'grommet';
-import { Location } from 'grommet-icons';
 
 import Context from '../Context';
 import Loader from '../Loader';
@@ -58,23 +57,20 @@ class Slider extends Component {
 }
 
 class Vote extends Component {
-  static propTypes = {
-    history: PropTypes.shape({}).isRequired,
-  }
-
   componentDidMount() {
     console.log(this.props.session.index);
     console.log(this.props.service.index);
+    console.log(this.props.account);
   }
 
   render() {
-    const { session, service, history } = this.props;
+    const { session, service } = this.props;
     const voter = session.index;
     const candidate = service.index;
     const { amount, term } = service.loan[0];
     return (
       <Context.Consumer>
-        {({ onVote, votes }) => (
+        {({ onVote, votes, account }) => (
           <form
             onSubmit={(event) => {
               event.preventDefault();
@@ -98,6 +94,10 @@ class Vote extends Component {
               <Property
                 name="Term"
                 value={term + " days"}
+              />
+              <Property
+                name="Account"
+                value={account}
               />
               <Property
                 name="Rate"
@@ -125,29 +125,12 @@ class Vote extends Component {
 
 const Service = ({ match: { params: { id } } }) => (
   <Loader id={id}>
-    {({
+    {({ 
       service,
       session,
       onVote,
       votes,
-      name,
-      gender,
-      birthDate,
-      birthPlace,
-      idCard,
-      momMaidenName,
-      hasDivorced,
-      isSingle,
-      lastEducation,
-      address,
-      houseStatus,
-      kelurahan,
-      kecamatan,
-      city,
-      zipCode,
-      phone,
-      email,
-      npwp,
+      account,
     }) => (
       <Box>
         {service.status === 'vote' && (
@@ -156,6 +139,7 @@ const Service = ({ match: { params: { id } } }) => (
             session={session}
             onVote={onVote}
             votes={votes}
+            account={account}
           />
         )}
         <Box
@@ -175,63 +159,7 @@ const Service = ({ match: { params: { id } } }) => (
         >
           <Property
             name="Gender"
-            value={gender}
-          />
-          <Property
-            name="Birth Date"
-            value={birthDate}
-          />
-          <Property
-            name="Birth Place"
-            value={birthPlace}
-          />
-          <Property
-            name="Phone Number"
-            value={phone}
-          />
-          <Property
-            name="Email"
-            value={email}
-          />
-          <Property
-            name="Citizenship ID"
-            value={idCard}
-          />
-          <Property
-            name="Marital Status"
-            value={isSingle}
-          />
-          <Property
-            name="Last Education"
-            value={lastEducation}
-          />
-          <Property
-            name="Address"
-            value={address}
-          />
-          <Property
-            name="City"
-            value={city}
-          />
-          <Property
-            name="District"
-            value={kecamatan}
-          />
-          <Property
-            name="Subdistrict"
-            value={kelurahan}
-          />
-          <Property
-            name="Zip Code"
-            value={zipCode}
-          />
-          <Property
-            name="House Status"
-            value={houseStatus}
-          />
-          <Property
-            name="NPWP"
-            value={npwp}
+            value="abc"
           />
         </Box>
       </Box>
