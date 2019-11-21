@@ -370,17 +370,63 @@ export default class Server extends Component {
     await this.state.TrstToken.methods.redeem(amount).send({from : this.state.account});
   }
 
+  // Vault
+  async loanStatus(address) {
+    return await this.state.Vault.methods.loanStatus(address).call();
+  }
+
+  async proposeLoan(address) {
+    return await this.state.Vault.methods.proposeLoan(address).call();
+  }
+
+  async term(address) {
+    return await this.state.Vault.methods.term(address).call();
+  }
+
+  async lentTimestamp(address) {
+    return await this.state.Vault.methods.lentTimestamp(address).call();
+  }
+
+  async interestRate() {
+    const numerator = await this.state.Vault.methods.interestRateNum().call()
+    const denominator = await this.state.Vault.methods.interestRateDenom().call()
+    return numerator / denominator
+  }
+
+  async latenessMultiplier() {
+    const numerator = await this.state.Vault.methods.latenessMultiplierNum().call()
+    const denominator = await this.state.Vault.methods.interestRateDenom().call()
+    return numerator / denominator
+  }
 
   async proposeLoan(amount, term) {
     await this.state.Vault.methods.proposeLoan(amount, term).send({from : this.state.account});
   }
 
-  async castVote(candidate, amount) {
-    if (this.state.Staking) {
-      await this.state.Staking.methods.setStake(candidate, amount*1000).send({from : this.state.account});
-    } else {
-      window.alert('Staking contract not deployed to detected network.');
-    }
+  async cancelProposal() {
+    await this.state.Vault.methods.cancelProposal().send({from : this.state.account});
+  }
+
+  async returnLoan() {
+    console.log("belom")
+    // await this.state.Vault.methods.cancelProposal().send({from : this.state.account});
+  }
+
+  // Staking
+  async stake(candidate, staker) {
+    await this.state.Staking.methods.stake(candidate, staker).call()
+  }
+
+  async totalStake(candidate) {
+    await this.state.Staking.methods.totalStake(candidate).call()
+  }
+
+  async setStake(candidate, amount) {
+    await this.state.Staking.methods.setStake(candidate, amount).send({from : this.state.account})
+  }
+
+  async cancelStake(candidate) {
+    await this.state.Staking.methods.cancelStake(candidate).send({from : this.state.account})
   }
 
   render() {
