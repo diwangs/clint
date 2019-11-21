@@ -106,6 +106,7 @@ export default class Server extends Component {
       this.loadContract(Vault),
       this.loadContract(Staking)
     ])
+    console.log(await this.stakable())
   }
 
   // Connect with MetaMask
@@ -351,12 +352,27 @@ export default class Server extends Component {
     });
   }
 
+  // Wrapped contract functions
+  // TrstToken
+  async balance(address) {
+    return await this.state.TrstToken.methods.balance(address).call();
+  }
+
+  async price() {
+    return await this.state.TrstToken.methods.price().call();
+  }
+
+  async totalSupply() {
+    return await this.state.TrstToken.methods.totalSupply().call();
+  }
+
+  async redeem(amount) {
+    await this.state.TrstToken.methods.redeem(amount).send({from : this.state.account});
+  }
+
+
   async proposeLoan(amount, term) {
-    if (this.state.Vault) {
-      await this.state.Vault.methods.proposeLoan(amount, term).send({from : this.state.account});
-    } else {
-      window.alert('Vault contract not deployed to detected network.');
-    }
+    await this.state.Vault.methods.proposeLoan(amount, term).send({from : this.state.account});
   }
 
   async castVote(candidate, amount) {
