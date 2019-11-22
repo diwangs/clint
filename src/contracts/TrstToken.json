@@ -8244,12 +8244,12 @@
         }
       },
       "links": {},
-      "address": "0x5fcb4575239E11D362be021ABc923fE6686EBfda",
-      "transactionHash": "0x208eaff55dfbbb7e358fec5284862c9976104b805c6e3f8cedc1a9066c420ead"
+      "address": "0x89201A4FF8Dfb94125468Dec3EfaAfc2d3c4Ca3a",
+      "transactionHash": "0xc2cb84d068ca4ba4a9449638bf7f7058cf6f494b26047205b049abe630371cf3"
     }
   },
   "schemaVersion": "3.0.17",
-  "updatedAt": "2019-11-21T15:27:52.868Z",
+  "updatedAt": "2019-11-22T05:43:16.531Z",
   "networkType": "ethereum",
   "devdoc": {
     "author": "Senapati Sang Diwangkara, from Affluent team",

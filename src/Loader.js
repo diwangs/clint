@@ -8,19 +8,13 @@ import Context from './Context';
 class Content extends Component {
   componentDidMount() {
     const {
-      id, session, service, onFind, onUnload, onVote, votes, account,
+      id, session, service, onVote, votes, account,
     } = this.props;
-    if (!service || service.id !== id) {
-      if (service) {
-        onUnload();
-      }
-      onFind(id);
-    }
   }
 
   render() {
     const { children, service, onVote, votes, session, account } = this.props;
-    if (!service) {
+    if (!account) {
       return (
         <Text>
           Loading ...
@@ -36,8 +30,6 @@ Content.propTypes = {
   id: PropTypes.string.isRequired,
   account: PropTypes.string.isRequired,
   service: PropTypes.shape({}),
-  onFind: PropTypes.func.isRequired,
-  onUnload: PropTypes.func.isRequired,
 };
 
 Content.defaultProps = {
@@ -46,21 +38,17 @@ Content.defaultProps = {
 
 const Loader = ({ children, id }) => (
   <Context.Consumer>
-    {({ service, onFind, onUnload, session, onVote, votes, account }) => (
-      onFind && (
-        <Content
-          id={id}
-          service={service}
-          account={account}
-          session={session}
-          votes={votes}
-          onFind={onFind}
-          onVote={onVote}
-          onUnload={onUnload}
-        >
-          {children}
-        </Content>
-      )
+    {({ service, session, onVote, votes, account }) => (
+      <Content
+        id={id}
+        service={service}
+        account={account}
+        session={session}
+        votes={votes}
+        onVote={onVote}
+      >
+        {children}
+      </Content>
     )}
   </Context.Consumer>
 );

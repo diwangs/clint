@@ -34,22 +34,23 @@ export default class Server extends Component {
       // window.web3.eth.defaultAccount = accounts[0] is defaultAccount deprecated?
       // https://ethereum.stackexchange.com/questions/38365/web3-eth-defaultaccount-not-working
       account = accounts[0];
+      this.setState({ account: accounts[0] })
     }
 
     // simulate intializing from server
     const votes = Array(10).fill().map(() => Array(10).fill(0));
     const services = [];
     const addresses = [
-      '0xceBc86eC5c9ee28702a0518EAC98c7E4d2569648',
-      '0x87139bb2e0da7e86E96a876C5A2fE1c8a31200d3',
-      '0x3657df40b78259029365fb6224342324f249c1ad',
-      '0x382f07957302852c298f125be10728b5c77929d1',
-      '0x43e270ebcfcc67e142556b9173db8b98cbaf97b3',
-      '0x7cfcb9a4d2f96835197a924a4294f0edbaf1465d',
-      '0x0314e5db07fd9322523622426893899445784503',
-      '0xde17b00ded5906e0ae9a4add5a11b868b0a1366e',
-      '0xf0a5931fab0970654675b68068bbe56242aace37',
-      '0x1d6d51cba34c7dcc36f48d946300bcdadfde8638',
+      '0xaCbe34092Fc4a3e422FD8417a9d90eb2321cec3D',
+      '0xCdD763D73998f1C63E70d4054bBfABd97a9C3C74',
+      '0x8789E41BDFA2386E2aab9613f50f07fc42D135c6',
+      '0x8E03ED8a3A03561Cf3D7C295176d00A2F015930d',
+      '0x056F199dDDc3e657A54FE34E227983A3c7901c58',
+      '0xba9f30D625a39aeaC3ec048E65fcF03cEe094AEF',
+      '0x8B6696B2e3b3307F7855B3ff39c0A2653eb98975',
+      '0xa5237aD35f6bEBeA340433D6A86a4bbc753768fA',
+      '0x6c99056cc59c5c17CA5C126Af8D54456E8544e0F',
+      '0x6c99056cc59c5c17CA5C126Af8D54456E8544e0F',
     ];
     const now = (new Date()).toISOString();
 
@@ -57,11 +58,10 @@ export default class Server extends Component {
     services.push({
       created: now,
       status: 'vote',
-      id: 'service-0',
+      id: addresses[0],
       index: 0,
       name: 'Hafizh Budiman',
       username: 'hafizh',
-      address: '35506bd9a1f536553f7b71e57dff00ce0fa104f380897f4666c3ecb665909191',
       loan: [
         {
           amount: 10000000,
@@ -75,11 +75,10 @@ export default class Server extends Component {
     services.push({
       created: now,
       status: 'vote',
-      id: 'service-1',
+      id: addresses[1],
       index: 1,
       name: 'Cornelius Yan Mintareja',
       username: 'onel',
-      address: '53e9fb16787da45443420a8ce22c44f3e45c5efde8bc6f5e40d3b9bf23f7674a',
       loan: [
         {
           amount: 5000000,
@@ -93,11 +92,32 @@ export default class Server extends Component {
     services.push({
       created: now,
       status: 'ok',
-      id: 'service-2',
+      id: addresses[2],
       index: 2,
       name: 'Senapati S. Diwangkara',
       username: 'diwang',
-      address: 'fe0a1016c29b590bb6984ccac01db6ad9918ae085025c29ce198a73465efa619',
+      loan: [],
+    });
+
+    // Add gabu
+    services.push({
+      created: now,
+      status: 'ok',
+      id: addresses[3],
+      index: 3,
+      name: 'gabu wibu',
+      username: 'gabu',
+      loan: [],
+    });
+
+    // Add nina
+    services.push({
+      created: now,
+      status: 'ok',
+      id: addresses[4],
+      index: 4,
+      name: 'Nina Nursita',
+      username: 'nina',
       loan: [],
     });
 
@@ -121,13 +141,14 @@ export default class Server extends Component {
 
     this.setState({ context: nextContext, services, addresses, votes, account });
 
-    await this.loadWeb3();
     await Promise.all([
       this.loadContract(TrstToken),
       this.loadContract(Vault),
-      this.loadContract(Staking)
-    ])
-    console.log(await this.stakable())
+      this.loadContract(Staking),
+    ]);
+
+    // this.state.TrstToken.methods.mint(addresses[1], 50000).send({from : addresses[0]});
+    // this.state.TrstToken.methods.mint(addresses[2], 50000).send({from : addresses[0]});
   }
 
   async loadContract(contractDefinition) {
@@ -139,7 +160,6 @@ export default class Server extends Component {
       var newState = {}
       newState[contractDefinition.contractName] = contractHandle
       this.setState(newState)
-      return contractHandle
     } else {
       window.alert("loadContract: " + contractDefinition.contractName + ' contract not deployed to detected network.')
     }
@@ -256,37 +276,13 @@ export default class Server extends Component {
   }
 
   onVote = ({ voter, candidate, amount }) => {
-    const { votes, context, addresses } = this.state;
-    const temp = votes;
-    temp[voter][candidate] = 1;
-    this.castVote(candidate, amount, addresses);
-    this.setState({
-      context: {
-        ...context,
-        votes: temp,
-      },
-      votes: temp,
-    });
+    console.log(voter + ' ' + candidate);
+    this.setStake(candidate, voter, amount*1000);
   }
 
   onCreate = ({ loanAmount, loanTerm }) => {
-    const { context, services } = this.state;
-    const newLoan = {
-      amount: loanAmount,
-      term: loanTerm,
-      status: 'In Approval',
-    };
-    const temp = services;
-    temp[context.session.index].loan = services[context.session.index].loan.concat(newLoan);
-    temp[context.session.index].status = 'vote';
+    console.log(loanAmount + ' ' + loanTerm);
     this.proposeLoan(loanAmount, loanTerm);
-    this.setState({
-      context: {
-        ...context,
-        services: temp,
-      },
-      services: temp,
-    });
   }
 
   onSearch = (search) => {
@@ -422,8 +418,8 @@ export default class Server extends Component {
     await this.state.Staking.methods.totalStake(candidate).call()
   }
 
-  async setStake(candidate, amount) {
-    await this.state.Staking.methods.setStake(candidate, amount).send({from : this.state.account})
+  async setStake(candidate, voter, amount) {
+    await this.state.Staking.methods.setStake(candidate, amount).send({from : voter})
   }
 
   async cancelStake(candidate) {

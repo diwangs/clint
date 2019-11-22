@@ -29,7 +29,7 @@ const Header = ({ history }) => (
         </RoutedButton>
         {session && (
           <Menu
-            label={'Welcome, ' + session.email}
+            label='Profile'
             items={[
               {
                 label: 'Circle',

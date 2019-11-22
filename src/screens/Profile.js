@@ -1,17 +1,19 @@
 import React, { Component } from 'react';
 import Web3 from 'web3';
 import {
-  Box, Grid, Heading, InfiniteScroll, RoutedButton, Text, Image,
+  Box, Grid, Heading, Chart, RoutedButton, Text, Image,
 } from 'grommet';
 
-import card from '../../public/img/card.png'
+import card from '../../public/img/card.png';
 
 import Context from '../Context';
 import TrstToken from '../contracts/TrstToken.json';
+import Vault from '../contracts/Vault.json';
+import chart from '../../public/img/chart.png';
 
 const Property = ({ name, value }) => (
   <Box direction="row-responsive" gap="small">
-    <Box basis="1/3">
+    <Box basis="1/4">
       <Text>
         {name}
       </Text>
@@ -32,52 +34,65 @@ export default class Services extends Component {
 
   async componentDidMount() {
     await this.loadWeb3();
-    await this.loadTokenContract();
+    await this.loadContract(TrstToken);
+    await this.loadContract(Vault);
     await this.getBalance();
+    await this.getLoanDetails();
   }
 
   async getBalance() {
-    const { tokenContract, account } = this.state;
-    const balance = await tokenContract.methods.balance(account).call();
+    const balance = await this.state.TrstToken.methods.balance(this.state.account).call();
     this.setState({ balance });
   }
 
-  async loadTokenContract() {
-    // Load account
-    const accounts = await window.web3.eth.getAccounts();
-    // console.log(accounts)
-    this.setState({ account: accounts[0] });
-
-    // Load contract
-    const networkId = await window.web3.eth.net.getId();
-    const networkData = TrstToken.networks[networkId];
-    if (networkData) {
-      const tokenContract = new window.web3.eth.Contract(TrstToken.abi, networkData.address);
-      // console.log(tokenContract)
-      this.setState({ tokenContract });
+  async getLoanDetails() {
+    const loanStatus = await this.state.Vault.methods.loanStatus(this.state.account).call();
+    if (loanStatus !== 0) {
+      const amount = await this.state.Vault.methods.proposedLoan(this.state.account).call();
+      const term = await this.state.Vault.methods.term(this.state.account).call();
+      this.setState({ loanStatus, amount, term });
     } else {
-      window.alert('TrstToken contract not deployed to detected network.');
+      this.setState({ loanStatus, amount: 0, term: 0 });
+    }
+  }
+
+  async loadContract(contractDefinition) {
+    const web3 = window.web3
+    const networkId = await web3.eth.net.getId()
+    const networkData = contractDefinition.networks[networkId]
+    if (networkData) {
+      const contractHandle = new web3.eth.Contract(contractDefinition.abi, networkData.address)
+      var newState = {}
+      newState[contractDefinition.contractName] = contractHandle
+      this.setState(newState)
+    } else {
+      window.alert("loadContract: " + contractDefinition.contractName + ' contract not deployed to detected network.')
     }
   }
 
   // Connect with MetaMask
   async loadWeb3() {
     if (window.ethereum) {
-      window.web3 = new Web3(window.ethereum);
-      await window.ethereum.enable();
-      console.log("in Profile")
-      console.log(window.web3)
+      window.web3 = new Web3(window.ethereum)
+      await window.ethereum.enable()
+    } else if (window.web3) {
+      window.web3 = new Web3(window.web3.currentProvider)
+    } else {
+      window.alert('Non-Ethereum browser detected. You should consider trying MetaMask!')
     }
-    else if (window.web3) {
-      window.web3 = new Web3(window.web3.currentProvider);
-    }
-    else {
-      window.alert('Non-Ethereum browser detected. You should consider trying MetaMask!');
+
+    // Load account
+    if (window.web3) {
+      const accounts = await window.web3.eth.getAccounts();
+      // window.web3.eth.defaultAccount = accounts[0] is defaultAccount deprecated?
+      // https://ethereum.stackexchange.com/questions/38365/web3-eth-defaultaccount-not-working
+      let account = accounts[0];
+      this.setState({ account: accounts[0] })
     }
   }
 
   render() {
-    const { balance } = this.state;
+    const { balance, loanStatus, amount, term } = this.state;
     return (
       <Context.Consumer>
         {({ session, services }) => (
@@ -119,46 +134,49 @@ export default class Services extends Component {
                 </Text>
               </Box>
             </Box>
-            <Box direction="row" justify="between" align="center">
+            <Box style={{width:'100%', height:'40%'}} margin={{ top: 'medium' }}>
+              <Image
+                src={chart}
+                fit="contain"
+              />
+            </Box>
+            <Box direction="row" justify="between" align="center" margin={{ top: 'medium' }}>
               <Heading size="small">
                 Loan Applications
               </Heading>
               <RoutedButton label="Apply" path="/add" />
             </Box>
             <Box margin={{ vertical: 'medium', top: 'medium' }}>
-              <Grid columns="small" gap="small">
-                {(services[session.index].loan && services[session.index].loan.length > 0) && (
-                  <InfiniteScroll items={services[session.index].loan}>
-                    {loan => (
-                      <Box
-                        basis="small"
-                        round="xsmall"
-                        overflow="hidden"
-                      >
-                        <Box
-                          justify="between"
-                          align="left"
-                          pad="medium"
-                          background={{ color: 'light-4', opacity: true }}
-                        >
-                          <Property
-                            name="Amount"
-                            value={'Rp ' + loan.amount/1000000 + ' million'}
-                          />
-                          <Property
-                            name="Term"
-                            value={loan.term + ' day'}
-                          />
-                          <Property
-                            name="Status"
-                            value={loan.status}
-                          />
-                        </Box>
-                      </Box>
-                    )}
-                  </InfiniteScroll>
-                )}
-              </Grid>
+              {(loanStatus > 0) ? (
+                <Box
+                  basis="small"
+                  round="xsmall"
+                  overflow="hidden"
+                >
+                  <Box
+                    justify="between"
+                    pad="medium"
+                    background={{ color: 'light-4', opacity: true }}
+                  >
+                    <Property
+                      name="Amount"
+                      value={'Rp ' + amount/1000000 + ' million'}
+                    />
+                    <Property
+                      name="Term"
+                      value={term + ' day'}
+                    />
+                    <Property
+                      name="Status"
+                      value={loanStatus}
+                    />
+                  </Box>
+                </Box>
+              ) : (
+                <Text>
+                  {"You haven't applied for a loan yet."}
+                </Text>
+              )}
             </Box>
           </Box>
         )}

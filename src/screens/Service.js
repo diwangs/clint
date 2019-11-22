@@ -6,6 +6,8 @@ import {
 
 import Context from '../Context';
 import Loader from '../Loader';
+import Vault from '../contracts/Vault.json';
+import Staking from '../contracts/Staking.json';
 
 const Property = ({ name, value }) => (
   <Box direction="row-responsive" gap="small">
@@ -27,7 +29,8 @@ Property.propTypes = {
   value: PropTypes.string.isRequired,
 };
 
-class Slider extends Component {
+class Vote extends Component {
+
   constructor(props) {
     super(props);
     this.state = {
@@ -35,46 +38,56 @@ class Slider extends Component {
     };
   }
 
-  render() {
-    const vote = this.state;
-    return (
-      <Fragment>
-        <Property
-          name="Stake"
-          value={vote.stake + ' Trust'}
-        />
-        <br />
-        <RangeInput
-          min={0}
-          max={20}
-          step={1}
-          value={vote.stake}
-          onChange={event => this.setState({ stake: parseInt(event.target.value, 10) })}
-        />
-      </Fragment>
-    );
-  }
-}
-
-class Vote extends Component {
-  componentDidMount() {
-    console.log(this.props.session.index);
-    console.log(this.props.service.index);
-    console.log(this.props.account);
+  async componentDidMount() {
+    await this.loadContract(Vault);
+    await this.loadContract(Staking);
+    await this.getLoanDetails();
+    await this.getStakeStatus();
   }
 
+  async getLoanDetails() {
+    const loanStatus = await this.state.Vault.methods.loanStatus(this.props.id).call();
+    if (loanStatus > 0) {
+      const amount = await this.state.Vault.methods.proposedLoan(this.props.id).call();
+      const term = await this.state.Vault.methods.term(this.props.id).call();
+      this.setState({ loanStatus, amount, term });
+    }
+  }
+
+  async getStakeStatus() {
+    const stakeStatus = await this.state.Staking.methods.stake(this.props.id, this.props.account).call();
+    this.setState({ stakeStatus });
+  }
+
+  async loadContract(contractDefinition) {
+    const web3 = window.web3
+    const networkId = await web3.eth.net.getId()
+    const networkData = contractDefinition.networks[networkId]
+    if (networkData) {
+      const contractHandle = new web3.eth.Contract(contractDefinition.abi, networkData.address)
+      var newState = {}
+      newState[contractDefinition.contractName] = contractHandle
+      this.setState(newState);
+    } else {
+      window.alert("loadContract: " + contractDefinition.contractName + ' contract not deployed to detected network.')
+    }
+  }
+
+  async setStake(candidate, voter, amount) {
+    console.log(this.props.id + ' ' + this.props.account);
+    await this.state.Staking.methods.setStake(this.props.id, amount*1000).send({from: this.props.account});
+  }
+
   render() {
-    const { session, service } = this.props;
-    const voter = session.index;
-    const candidate = service.index;
-    const { amount, term } = service.loan[0];
+    const { account, id } = this.props;
+    const { stake, amount, term, stakeStatus } = this.state;
     return (
       <Context.Consumer>
-        {({ onVote, votes, account }) => (
+        {({ onVote, votes }) => (
           <form
             onSubmit={(event) => {
               event.preventDefault();
-              onVote({ candidate, voter, amount });
+              this.setStake(id, account, stake);
             }}
           >
             <Box
@@ -96,15 +109,22 @@ class Vote extends Component {
                 value={term + " days"}
               />
               <Property
-                name="Account"
-                value={account}
-              />
-              <Property
                 name="Rate"
                 value="10%"
               />
-              <Slider />
-              {votes[voter][candidate] === 0 && (
+              <Property
+                name="Stake"
+                value={stake + ' Trust'}
+              />
+              <br />
+              <RangeInput
+                min={-20}
+                max={20}
+                step={1}
+                value={stake}
+                onChange={event => this.setState({ stake: parseInt(event.target.value, 10) })}
+              />
+              {stakeStatus === "0" && (
                 <Button
                   type="submit"
                   label="Vote"
@@ -123,6 +143,55 @@ class Vote extends Component {
   }
 }
 
+class Detail extends Component {
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      stake: 0,
+    };
+  }
+
+  async componentDidMount() {
+    this.getData();
+  }
+
+  async getData() {
+    const user = await this.state.Vault.methods.loanStatus(this.props.id).call();
+    console.log(user.data);
+    const { name, gender, idCard, npwp } = user.data;
+    this.setState({ name, gender, idCard, npwp });
+  }
+
+  render() {
+
+    const { name, gender, idCard, npwp } = this.state;
+    return (
+      <Box
+        gap="large"
+        margin={{ bottom: 'large' }}
+      >
+        <Property
+          name="Name"
+          value={name}
+        />
+        <Property
+          name="Gender"
+          value={gender}
+        />
+        <Property
+          name="Citizenship ID"
+          value={idCard}
+        />
+        <Property
+          name="NPWP"
+          value={npwp}
+        />
+      </Box>
+    );
+  }
+}
+
 const Service = ({ match: { params: { id } } }) => (
   <Loader id={id}>
     {({ 
@@ -133,15 +202,14 @@ const Service = ({ match: { params: { id } } }) => (
       account,
     }) => (
       <Box>
-        {service.status === 'vote' && (
-          <Vote
-            service={service}
-            session={session}
-            onVote={onVote}
-            votes={votes}
-            account={account}
-          />
-        )}
+        <Vote
+          service={service}
+          session={session}
+          onVote={onVote}
+          votes={votes}
+          account={account}
+          id={id}
+        />
         <Box
           direction="row"
           justify="between"
@@ -150,18 +218,10 @@ const Service = ({ match: { params: { id } } }) => (
           margin={{ top: 'large', bottom: 'large' }}
         >
           <Heading size="small" color="brand">
-            {name}
+            Details
           </Heading>
         </Box>
-        <Box
-          gap="large"
-          margin={{ bottom: 'large' }}
-        >
-          <Property
-            name="Gender"
-            value="abc"
-          />
-        </Box>
+        <Detail id={id}/>
       </Box>
     )}
   </Loader>
