@@ -144,7 +144,9 @@ export default class Services extends Component {
               <Heading size="small">
                 Loan Applications
               </Heading>
-              <RoutedButton label="Apply" path="/add" />
+              {(loanStatus === "0") && (
+                <RoutedButton label="Apply" path="/add" />
+              )}
             </Box>
             <Box margin={{ vertical: 'medium', top: 'medium' }}>
               {(loanStatus > 0) ? (
