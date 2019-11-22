@@ -2,11 +2,11 @@ import React, { Component, Fragment } from 'react';
 import {
   Box, Grid, Heading, InfiniteScroll, RoutedButton, Text, TextInput,
 } from 'grommet';
+import Axios from 'axios';
 
 import Context from '../Context';
 import TrstToken from '../contracts/TrstToken.json';
 import Vault from '../contracts/Vault.json';
-import Axios from 'axios';
 
 const addresses = [
   '0xaCbe34092Fc4a3e422FD8417a9d90eb2321cec3D',
@@ -97,7 +97,7 @@ export default class Services extends Component {
               onChange={event => this.setState({ search: event.target.value })}
             />
             <Box margin={{ vertical: 'medium' }}>
-              <Grid columns="small" gap="small">
+              <Grid columns="medium" gap="small">
                 {circle ? (
                   <InfiniteScroll items={circle}>
                     {circle => (

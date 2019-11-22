@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import {
   Box, Heading, Button, Text, RangeInput,
 } from 'grommet';
+import Axios from 'axios';
 
 import Context from '../Context';
 import Loader from '../Loader';
@@ -43,6 +44,7 @@ class Vote extends Component {
     await this.loadContract(Staking);
     await this.getLoanDetails();
     await this.getStakeStatus();
+    await this.getData();
   }
 
   async getLoanDetails() {
@@ -78,116 +80,109 @@ class Vote extends Component {
     await this.state.Staking.methods.setStake(this.props.id, amount*1000).send({from: this.props.account});
   }
 
-  render() {
-    const { account, id } = this.props;
-    const { stake, amount, term, stakeStatus } = this.state;
-    return (
-      <Context.Consumer>
-        {({ onVote, votes }) => (
-          <form
-            onSubmit={(event) => {
-              event.preventDefault();
-              this.setStake(id, account, stake);
-            }}
-          >
-            <Box
-              margin="small"
-              pad="large"
-              round="medium"
-              gap="small"
-              background="brand"
-            >
-              <Text size="xxlarge" alignSelf="center">
-                <strong>Vote</strong>
-              </Text>
-              <Property
-                name="Amount"
-                value={amount/1000000 + " million Rupiah"}
-              />
-              <Property
-                name="Term"
-                value={term + " days"}
-              />
-              <Property
-                name="Rate"
-                value="10%"
-              />
-              <Property
-                name="Stake"
-                value={stake + ' Trust'}
-              />
-              <br />
-              <RangeInput
-                min={-20}
-                max={20}
-                step={1}
-                value={stake}
-                onChange={event => this.setState({ stake: parseInt(event.target.value, 10) })}
-              />
-              {stakeStatus === "0" && (
-                <Button
-                  type="submit"
-                  label="Vote"
-                  primary
-                  alignSelf="center"
-                  color="accent"
-                  margin={{ top: "medium" }}
-                  onClick={() => {}}
-                />
-              )}
-            </Box>
-          </form>
-        )}
-      </Context.Consumer>
-    );
-  }
-}
-
-class Detail extends Component {
-
-  constructor(props) {
-    super(props);
-    this.state = {
-      stake: 0,
-    };
-  }
-
-  async componentDidMount() {
-    this.getData();
-  }
-
   async getData() {
-    const user = await this.state.Vault.methods.loanStatus(this.props.id).call();
-    console.log(user.data);
+    const user = await Axios.get('http://3.91.229.34:3000/user/' + this.props.id);
     const { name, gender, idCard, npwp } = user.data;
     this.setState({ name, gender, idCard, npwp });
   }
 
   render() {
-
-    const { name, gender, idCard, npwp } = this.state;
+    const { account, id } = this.props;
+    const { stake, amount, term, stakeStatus, name, gender, idCard, npwp } = this.state;
     return (
-      <Box
-        gap="large"
-        margin={{ bottom: 'large' }}
-      >
-        <Property
-          name="Name"
-          value={name}
-        />
-        <Property
-          name="Gender"
-          value={gender}
-        />
-        <Property
-          name="Citizenship ID"
-          value={idCard}
-        />
-        <Property
-          name="NPWP"
-          value={npwp}
-        />
-      </Box>
+      <Context.Consumer>
+        {({ onVote, votes }) => (
+          <Fragment>
+              <form
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  this.setStake(id, account, stake);
+                }}
+              >
+                <Box
+                  margin="small"
+                  pad="large"
+                  round="medium"
+                  gap="small"
+                  background="brand"
+                >
+                  <Text size="xxlarge" alignSelf="center">
+                    <strong>Vote</strong>
+                  </Text>
+                  <Property
+                    name="Amount"
+                    value={amount/1000000 + " million Rupiah"}
+                  />
+                  <Property
+                    name="Term"
+                    value={term + " days"}
+                  />
+                  <Property
+                    name="Rate"
+                    value="10%"
+                  />
+                  <Property
+                    name="Stake"
+                    value={stake + ' Trust'}
+                  />
+                  <br />
+                  <RangeInput
+                    min={-20}
+                    max={20}
+                    step={1}
+                    value={stake}
+                    onChange={event => this.setState({ stake: parseInt(event.target.value, 10) })}
+                  />
+                  {stakeStatus === "0" && (
+                    <Button
+                      type="submit"
+                      label="Vote"
+                      primary
+                      alignSelf="center"
+                      color="accent"
+                      margin={{ top: "medium" }}
+                      onClick={() => {}}
+                    />
+                  )}
+                </Box>
+              </form>
+              <Box
+                direction="row"
+                justify="between"
+                align="center"
+                gap="small"
+                margin={{ top: 'large', bottom: 'large' }}
+              >
+                <Heading size="small" color="brand">
+                  {name ? ('Details') : ('Fetching Details...')}
+                </Heading>
+              </Box>
+              {name && (
+                <Box
+                  gap="large"
+                  margin={{ bottom: 'large' }}
+                >
+                  <Property
+                    name="Name"
+                    value={name}
+                  />
+                  <Property
+                    name="Gender"
+                    value={gender}
+                  />
+                  <Property
+                    name="Citizenship ID"
+                    value={idCard}
+                  />
+                  <Property
+                    name="NPWP"
+                    value={npwp}
+                  />
+                </Box>
+              )}
+          </Fragment>
+        )}
+      </Context.Consumer>
     );
   }
 }
@@ -210,18 +205,6 @@ const Service = ({ match: { params: { id } } }) => (
           account={account}
           id={id}
         />
-        <Box
-          direction="row"
-          justify="between"
-          align="center"
-          gap="small"
-          margin={{ top: 'large', bottom: 'large' }}
-        >
-          <Heading size="small" color="brand">
-            Details
-          </Heading>
-        </Box>
-        <Detail id={id}/>
       </Box>
     )}
   </Loader>
