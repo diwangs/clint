@@ -121,6 +121,17 @@ export default class Server extends Component {
       loan: [],
     });
 
+    // Add nina
+    services.push({
+      created: now,
+      status: 'ok',
+      id: addresses[4],
+      index: 4,
+      name: 'Christian Wibisono',
+      username: 'christian',
+      loan: [],
+    });
+
     const nextContext = {
       ...context,
       services,

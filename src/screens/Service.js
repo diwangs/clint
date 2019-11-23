@@ -1,8 +1,9 @@
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import {
-  Box, Heading, Button, Text, RangeInput,
+  Box, Heading, Button, Text, RangeInput, Layer,
 } from 'grommet';
+import { FormClose } from 'grommet-icons';
 import Axios from 'axios';
 
 import Context from '../Context';
@@ -36,6 +37,7 @@ class Vote extends Component {
     super(props);
     this.state = {
       stake: 0,
+      open: false,
     };
   }
 
@@ -78,21 +80,61 @@ class Vote extends Component {
   async setStake(candidate, voter, amount) {
     console.log(this.props.id + ' ' + this.props.account);
     await this.state.Staking.methods.setStake(this.props.id, amount*1000).send({from: this.props.account});
+    this.voteMessage();
   }
 
   async getData() {
     const user = await Axios.get('http://3.91.229.34:3000/user/' + this.props.id);
-    const { name, gender, idCard, npwp } = user.data;
-    this.setState({ name, gender, idCard, npwp });
+    const { name, gender, city, lastEducation } = user.data;
+    this.setState({ name, gender, city, lastEducation });
+  }
+
+  voteMessage() {
+    this.setState({ open: true, loanStatus: "0" });
   }
 
   render() {
     const { account, id } = this.props;
-    const { stake, amount, term, stakeStatus, name, gender, idCard, npwp } = this.state;
+    const { open, stake, amount, term, stakeStatus, name, gender, city, lastEducation } = this.state;
     return (
       <Context.Consumer>
         {({ onVote, votes }) => (
-          <Fragment>
+            <Fragment>
+              {open && (
+                <Layer
+                  position="bottom"
+                  modal={false}
+                  margin={{ vertical: "medium", horizontal: "small" }}
+                  onEsc={(event) => {
+                    event.preventDefault();
+                    this.setState({ open: false });
+                  }}
+                  responsive={false}
+                  plain
+                >
+                  <Box
+                    align="center"
+                    direction="row"
+                    gap="small"
+                    justify="between"
+                    round="medium"
+                    elevation="medium"
+                    pad={{ vertical: "xsmall", horizontal: "small" }}
+                    background="accent"
+                  >
+                    <Box align="center" direction="row" gap="xsmall">
+                      <Text>You have successfully voted!</Text>
+                    </Box>
+                    <Button 
+                      icon={<FormClose />} 
+                      onClick={(event) => {
+                        event.preventDefault();
+                        this.setState({ open: false });
+                      }}
+                    />
+                  </Box>
+                </Layer>
+              )}
               <form
                 onSubmit={(event) => {
                   event.preventDefault();
@@ -107,42 +149,92 @@ class Vote extends Component {
                   background="brand"
                 >
                   <Text size="xxlarge" alignSelf="center">
-                    <strong>Vote</strong>
+                    <strong>
+                      {stakeStatus === '0' ? 'Vote' : 'Voted'}
+                    </strong>
                   </Text>
-                  <Property
-                    name="Amount"
-                    value={amount/1000000 + " million Rupiah"}
-                  />
-                  <Property
-                    name="Term"
-                    value={term + " days"}
-                  />
-                  <Property
-                    name="Rate"
-                    value="10%"
-                  />
-                  <Property
-                    name="Stake"
-                    value={stake + ' Trust'}
-                  />
-                  <br />
-                  <RangeInput
-                    min={-20}
-                    max={20}
-                    step={1}
-                    value={stake}
-                    onChange={event => this.setState({ stake: parseInt(event.target.value, 10) })}
-                  />
-                  {stakeStatus === "0" && (
-                    <Button
-                      type="submit"
-                      label="Vote"
-                      primary
-                      alignSelf="center"
-                      color="accent"
-                      margin={{ top: "medium" }}
-                      onClick={() => {}}
-                    />
+                  {stakeStatus === '0' && (
+                    <Fragment>
+                      <Box
+                        direction="row"
+                        justify="between"
+                        align="center"
+                        background="brand"
+                        height="xsmall"
+                        pad="large"
+                        round="medium"
+                        margin={{ top: "medium" }}
+                      >
+                        <Box direction="column">
+                          <Text size="xxlarge">
+                            <strong>
+                              {amount/1000000 + "m "}
+                            </strong>
+                          </Text>
+                          <Text size="small">
+                            amount
+                          </Text>
+                        </Box>
+                        <Box direction="column">
+                          <Text size="xxlarge">
+                            <strong>
+                              {term + " days"}
+                            </strong>
+                          </Text>
+                          <Text size="small">
+                            term
+                          </Text>
+                        </Box>
+                        <Box direction="column">
+                          <Text size="xxlarge">
+                            <strong>
+                              10%
+                            </strong>
+                          </Text>
+                          <Text size="small">
+                            rate
+                          </Text>
+                        </Box>
+                      </Box>
+                      <br />
+                      <RangeInput
+                        min={-20}
+                        max={20}
+                        step={1}
+                        value={stake}
+                        onChange={event => this.setState({ stake: parseInt(event.target.value, 10) })}
+                      />
+                      <Box
+                        direction="row"
+                        justify="between"
+                        align="center"
+                        background="brand"
+                        height="xsmall"
+                        pad="large"
+                        round="medium"
+                        margin={{ top: "medium" }}
+                      >
+                        <Box direction="column">
+                          <Text size="xxlarge">
+                            <strong>
+                              {stake + ' Trust'}
+                            </strong>
+                          </Text>
+                          <Text size="small">
+                            stake
+                          </Text>
+                        </Box>
+                        <Button
+                          type="submit"
+                          label="Vote"
+                          primary
+                          alignSelf="center"
+                          color="accent"
+                          margin={{ top: "medium" }}
+                          onClick={() => {}}
+                        />
+                      </Box>
+                    </Fragment>
                   )}
                 </Box>
               </form>
@@ -167,16 +259,20 @@ class Vote extends Component {
                     value={name}
                   />
                   <Property
+                    name="Reason"
+                    value="Biaya Kuliah Anak 4 Semester"
+                  />
+                  <Property
                     name="Gender"
                     value={gender}
                   />
                   <Property
-                    name="Citizenship ID"
-                    value={idCard}
+                    name="City"
+                    value={city}
                   />
                   <Property
-                    name="NPWP"
-                    value={npwp}
+                    name="Monthly Income"
+                    value="IDR 10 million"
                   />
                 </Box>
               )}

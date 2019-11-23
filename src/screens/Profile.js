@@ -1,8 +1,9 @@
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import Web3 from 'web3';
 import {
-  Box, Grid, Heading, Chart, RoutedButton, Text, Image,
+  Box, Heading, RoutedButton, Text, Image, Layer, Button,
 } from 'grommet';
+import { FormClose } from 'grommet-icons';
 
 import card from '../../public/img/card.png';
 
@@ -29,7 +30,9 @@ const Property = ({ name, value }) => (
 export default class Services extends Component {
   constructor(props) {
     super(props);
-    this.state = {};
+    this.state = {
+      open: false,
+    };
   }
 
   async componentDidMount() {
@@ -91,96 +94,142 @@ export default class Services extends Component {
     }
   }
 
+  voteMessage() {
+    this.setState({ open: true, balance: 54000 });
+  }
+
   render() {
-    const { balance, loanStatus, amount, term } = this.state;
+    const { balance, loanStatus, amount, term, open } = this.state;
     return (
       <Context.Consumer>
         {({ session, services }) => (
-          <Box>
-            <Box
-              direction="row"
-              justify="between"
-              align="center"
-              background="brand"
-              height="xsmall"
-              pad="large"
-              round="medium"
-              margin={{ top: "medium" }}
-            >
-              <Box height="xsmall" width="xxsmall">
+          <Fragment>
+            {open && (
+              <Layer
+                position="center"
+                modal={false}
+                margin={{ vertical: "medium", horizontal: "small" }}
+                onEsc={(event) => {
+                  event.preventDefault();
+                  this.setState({ open: false });
+                }}
+                responsive={false}
+                plain
+              >
+                <Box
+                  align="center"
+                  direction="row"
+                  gap="small"
+                  justify="between"
+                  round="medium"
+                  elevation="medium"
+                  pad={{ vertical: "small", horizontal: "small" }}
+                  background="accent"
+                >
+                  <Box direction="column">
+                    <Text size="xlarge"><strong>Congratulations!</strong></Text>
+                    <Text size="large">You get 15 Trst from your recent vote. Your balance now is 54 Trst.</Text>
+                  </Box>
+                  <Button 
+                    icon={<FormClose />} 
+                    onClick={(event) => {
+                      event.preventDefault();
+                      this.setState({ open: false });
+                    }}
+                  />
+                </Box>
+              </Layer>
+            )}
+            <Box>
+              <Box
+                direction="row"
+                justify="between"
+                align="center"
+                background="brand"
+                height="xsmall"
+                pad="large"
+                round="medium"
+                margin={{ top: "medium" }}
+              >
+                <Box height="xsmall" width="xxsmall">
+                  <Image
+                    src={card}
+                    fit="contain"
+                  />
+                </Box>
+                <Box direction="column">
+                  <Text size="xxlarge">
+                    <strong>
+                      {balance ? (balance/1000) + ' trst' : 'Retrieving...'}
+                    </strong>
+                  </Text>
+                  <Text size="small">
+                    current balance
+                  </Text>
+                </Box>
+                <Box direction="column">
+                  <Text size="xxlarge">
+                    <strong>
+                      13/11
+                    </strong>
+                  </Text>
+                  <Text size="small">
+                    last voted
+                  </Text>
+                </Box>
+              </Box>
+              <Box style={{width:'100%', height:'40%'}} margin={{ top: 'medium' }}>
                 <Image
-                  src={card}
+                  src={chart}
                   fit="contain"
+                  onClick={(event) => {
+                    event.preventDefault();
+                    this.voteMessage();
+                  }}
                 />
               </Box>
-              <Box direction="column">
-                <Text size="xxlarge">
-                  <strong>
-                    {balance ? (balance/1000) + ' trst' : 'Retrieving...'}
-                  </strong>
-                </Text>
-                <Text size="small">
-                  current balance
-                </Text>
+              <Box direction="row" justify="between" align="center" margin={{ top: 'medium' }}>
+                <Heading size="small">
+                  Loan Applications
+                </Heading>
+                {(loanStatus === "0") && (
+                  <RoutedButton label="Apply" path="/add" />
+                )}
               </Box>
-              <Box direction="column">
-                <Text size="xxlarge">
-                  <strong>
-                    13/11
-                  </strong>
-                </Text>
-                <Text size="small">
-                  last voted
-                </Text>
-              </Box>
-            </Box>
-            <Box style={{width:'100%', height:'40%'}} margin={{ top: 'medium' }}>
-              <Image
-                src={chart}
-                fit="contain"
-              />
-            </Box>
-            <Box direction="row" justify="between" align="center" margin={{ top: 'medium' }}>
-              <Heading size="small">
-                Loan Applications
-              </Heading>
-              {(loanStatus === "0") && (
-                <RoutedButton label="Apply" path="/add" />
-              )}
-            </Box>
-            <Box margin={{ vertical: 'medium', top: 'medium' }}>
-              {(loanStatus > 0) ? (
-                <Box
-                  basis="small"
-                  round="xsmall"
-                  overflow="hidden"
-                >
+              <Box margin={{ vertical: 'medium', top: 'medium' }}>
+                {(loanStatus > 0) ? (
                   <Box
-                    justify="between"
-                    pad="medium"
-                    background={{ color: 'light-4', opacity: true }}
+                    basis="small"
+                    round="xsmall"
+                    overflow="hidden"
                   >
-                    <Property
-                      name="Amount"
-                      value={'Rp ' + amount/1000000 + ' million'}
-                    />
-                    <Property
-                      name="Term"
-                      value={term + ' day'}
-                    />
-                    <Property
-                      name="Status"
-                      value={loanStatus}
-                    />
+                    <Box
+                      justify="between"
+                      pad="medium"
+                      background={{ color: 'light-4', opacity: true }}
+                    >
+                      <Property
+                        name="Amount"
+                        value={'Rp ' + amount/1000000 + ' million'}
+                      />
+                      <Property
+                        name="Term"
+                        value={term + ' day'}
+                      />
+                      <Property
+                        name="Status"
+                        value={loanStatus}
+                      />
+                    </Box>
                   </Box>
-                </Box>
-              ) : (
-                <Text>
-                  {"You haven't applied for a loan yet."}
-                </Text>
-              )}
+                ) : (
+                  <Text>
+                    {"You haven't applied for a loan yet."}
+                  </Text>
+                )}
+              </Box>
             </Box>
-          </Box>
+          </Fragment>
         )}
       </Context.Consumer>
     );
