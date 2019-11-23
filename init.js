@@ -37,6 +37,10 @@ async function main() {
     await tokenContract.methods.mint(accounts[7], "100000").send({from: root})
     await tokenContract.methods.mint(accounts[8], "100000").send({from: root})
     await tokenContract.methods.mint(accounts[9], "100000").send({from: root})
+
+    await stakingContract.methods.setUpperThreshold("15000").send({from: root})
+    await stakingContract.methods.setRewardRateDenom("10").send({from: root})
+    await stakingContract.methods.setPunishmentRateDenom("10").send({from: root})
 }
 
 main()
